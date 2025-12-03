@@ -44,7 +44,7 @@
     "codemirror": "^6.0.0",
     "codemirror-solidity": "^0.2.5",
     "core-js": "^3.22.5",
-    "ethers": "^5.7.2",
+    "ethers": "^6.13.0",
     "file-saver": "^2.0.2",
     "flag-icons": "^6.9.2",
     "font-mfizz": "^2.4.1",
@@ -76,9 +76,7 @@
     "webpack": "5.94.0",
     "webpack-dev-server": "5.2.1",
     "tmp": "0.2.4",
-    "@babel/runtime": "7.26.10",
-    "inflight": "2.0.0",
-    "codemirror": "6.0.0"
+    "@babel/runtime": "7.26.10"
   },
   "devDependencies": {
     "@angular-eslint/builder": "^0.8.0-beta.7",
