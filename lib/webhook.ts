@@ -4,6 +4,8 @@
  */
 
 import os from 'os'
+import { promisify } from 'util'
+import request from 'request'
 import logger from './logger'
 import config from 'config'
 import colors from 'colors/safe'
@@ -14,12 +16,8 @@ export const notify = async (challenge: { key: any, name: any }, cheatScore = -1
   if (!webhook) {
     return
   }
-  const res = await fetch(webhook, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
+  const res = await post(webhook, {
+    json: {
       solution: {
         challenge: challenge.key,
         cheatScore,
@@ -34,7 +32,7 @@ export const notify = async (challenge: { key: any, name: any }, cheatScore = -1
         config: process.env.NODE_ENV ?? 'default',
         version: utils.version()
       }
-    })
+    }
   })
   logger.info(`Webhook ${colors.bold(webhook)} notified about ${colors.cyan(challenge.key)} being solved: ${res.status < 400 ? colors.green(res.status.toString()) : colors.red(res.status.toString())}`)
 }
