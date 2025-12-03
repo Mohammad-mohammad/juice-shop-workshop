@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core'
 import { KeysService } from '../Services/keys.service'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
 import { web3WalletABI } from '../../assets/public/ContractABIs'
-import { getDefaultProvider, BrowserProvider, Contract, parseEther, formatEther } from 'ethers'
+import { getDefaultProvider, ethers, BigNumber } from 'ethers'
 import {
   createClient,
   connect,
@@ -51,13 +51,13 @@ export class WalletWeb3Component {
 
   async depositETH () {
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
 
-      const contract = new Contract(BankAddress, web3WalletABI, signer)
+      const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
       const depositAmount = this.inputAmount.toString()
       const transaction = await contract.ethdeposit(this.metamaskAddress, {
-        value: parseEther(depositAmount)
+        value: ethers.utils.parseEther(depositAmount)
       })
       const txConfirmation = await transaction.wait()
       this.getUserEthBalance()
@@ -68,13 +68,13 @@ export class WalletWeb3Component {
 
   async withdrawETH () {
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
 
-      const contract = new Contract(BankAddress, web3WalletABI, signer)
+      const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
       const withdrawalAmount = this.inputAmount.toString()
       const transaction = await contract.withdraw(
-        parseEther(withdrawalAmount)
+        ethers.utils.parseEther(withdrawalAmount)
       )
       const txConfirmation = await transaction.wait()
       this.getUserEthBalance()
@@ -85,11 +85,11 @@ export class WalletWeb3Component {
 
   async getUserEthBalance () {
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const contract = new Contract(BankAddress, web3WalletABI, signer)
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const contract = new ethers.Contract(BankAddress, web3WalletABI, signer)
       const userBalance = await contract.balanceOf(this.metamaskAddress)
-      const formattedBalance = formatEther(userBalance)
+      const formattedBalance = ethers.utils.formatEther(userBalance)
       this.walletBalance = formattedBalance
     } catch (error) {
       this.errorMessage = error.message

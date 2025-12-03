@@ -2,10 +2,11 @@
   <div class="sandbox-container_body">
     <div class="sandbox-container_body_left">
       <div class="editor-title">{{"TITLE_CONTRACT_EDITOR" | translate}}</div>
-      <ngx-codemirror
+      <textarea
+        class="code-editor"
         [(ngModel)]="code"
-        [options]="editorOptions"
-      ></ngx-codemirror>
+        spellcheck="false"
+      ></textarea>
     </div>
     <div class="sandbox-container_body_right">
       <div class="playground-wallet">

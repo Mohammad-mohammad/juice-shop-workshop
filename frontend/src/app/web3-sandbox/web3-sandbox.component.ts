@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core'
 import { KeysService } from '../Services/keys.service'
 import { SnackBarHelperService } from '../Services/snack-bar-helper.service'
-import { getDefaultProvider, ethers, BrowserProvider, Contract, ContractFactory, parseUnits, type Overrides } from 'ethers'
+import { getDefaultProvider, ethers, BigNumber } from 'ethers'
 import {
   createClient,
   connect,
@@ -70,12 +70,6 @@ contract HelloWorld {
         return 'Hello Contracts';
     }
 }`
-  editorOptions = {
-    mode: 'text/x-solidity',
-    theme: 'dracula',
-    lineNumbers: true,
-    lineWrapping: true
-  }
 
   async compileAndFetchContracts (code: string) {
     try {
@@ -124,27 +118,27 @@ contract HelloWorld {
         return
       }
 
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
 
       const contractBytecode = selectedContract.evm.bytecode.object
       const contractAbi = selectedContract.abi
 
-      const factory = new ContractFactory(
+      const factory = new ethers.ContractFactory(
         contractAbi,
         contractBytecode,
         signer
       )
-      const transactionOptions: Overrides = {}
+      const transactionOptions: ethers.PayableOverrides = {}
       if (this.commonGweiValue > 0) {
-        transactionOptions.value = parseUnits(
+        transactionOptions.value = ethers.utils.parseUnits(
           this.commonGweiValue.toString(),
           'gwei'
         )
       }
       const contract = await factory.deploy(transactionOptions)
-      await contract.waitForDeployment()
-      this.deployedContractAddress = await contract.getAddress()
+      await contract.deployed()
+      this.deployedContractAddress = contract.address
 
       this.contractFunctions = contractAbi
         .filter((item) => item.type === 'function')
@@ -188,9 +182,9 @@ contract HelloWorld {
       const selectedContract =
         this.compiledContracts[this.selectedContractName]
 
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const contract = new Contract(
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const contract = new ethers.Contract(
         this.deployedContractAddress,
         selectedContract.abi,
         signer
@@ -203,9 +197,9 @@ contract HelloWorld {
             return this.parseInputValue(value.trim(), inputType)
           })
           : []
-      const transactionOptions: Overrides = {}
+      const transactionOptions: ethers.PayableOverrides = {}
       if (this.commonGweiValue > 0) {
-        transactionOptions.value = parseUnits(
+        transactionOptions.value = ethers.utils.parseUnits(
           this.commonGweiValue.toString(),
           'gwei'
         )

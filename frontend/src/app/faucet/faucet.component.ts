@@ -7,7 +7,7 @@ import {
   BeeTokenABI,
   nftABI
 } from '../../assets/public/ContractABIs'
-import { getDefaultProvider, BrowserProvider, Contract, parseUnits, formatEther } from 'ethers'
+import { getDefaultProvider, ethers, type BigNumber } from 'ethers'
 import {
   createClient,
   connect,
@@ -95,19 +95,20 @@ export class FaucetComponent {
 
   async fetchMyBeeBalance () {
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
 
-      const contract = new Contract(
+      const contract = new ethers.Contract(
         BeeTokenAddress,
         BeeTokenABI,
         signer
       )
       const userAddress = await signer.getAddress()
-      const balanceBigInt: bigint = await contract.balanceOf(userAddress)
-      console.log(balanceBigInt)
-      const WeiPerEther = 10n ** 18n
-      this.myBEEBalance = Number(balanceBigInt / WeiPerEther)
+      const balanceBigNumber: BigNumber = await contract.balanceOf(userAddress)
+      console.log(balanceBigNumber)
+      this.myBEEBalance = balanceBigNumber
+        .div(ethers.constants.WeiPerEther)
+        .toNumber()
       if (this.myBEEBalance >= 1000 && !this.challengeSolved) {
         this.mintButtonDisabled = false
       }
@@ -121,10 +122,10 @@ export class FaucetComponent {
 
   async fetchBeeBalance () {
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
 
-      const contract = new Contract(
+      const contract = new ethers.Contract(
         BeeFaucetAddress,
         BeeFaucetABI,
         signer
@@ -201,20 +202,20 @@ export class FaucetComponent {
       return
     }
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
       const userAddress = await signer.getAddress()
 
-      const balanceBigInt = await provider.getBalance(userAddress)
+      const balanceBigNumber = await provider.getBalance(userAddress)
 
-      const balanceEth = formatEther(balanceBigInt)
+      const balanceEth = ethers.utils.formatEther(balanceBigNumber)
 
       console.log('ETH balance:', balanceEth, typeof balanceEth)
       if (balanceEth < '0.001') {
         this.errorMessage = 'Deposit some test ETH from sepoliafaucet.com or any other ETH faucet to initiate transaction.'
         return
       }
-      const contract = new Contract(
+      const contract = new ethers.Contract(
         BeeFaucetAddress,
         BeeFaucetABI,
         signer
@@ -240,10 +241,10 @@ export class FaucetComponent {
       this.nftMintText = translatedString
     })
     try {
-      const provider = new BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-      const amountToApprove = parseUnits('1000', 18)
-      const BeeTokenContract = new Contract(
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const amountToApprove = ethers.utils.parseUnits('1000', '18')
+      const BeeTokenContract = new ethers.Contract(
         BeeTokenAddress,
         BeeTokenABI,
         signer
@@ -258,7 +259,7 @@ export class FaucetComponent {
         this.nftMintText = translatedString
       })
 
-      const contract = new Contract(nftAddress, nftABI, signer)
+      const contract = new ethers.Contract(nftAddress, nftABI, signer)
 
       const transaction = await contract.mintNFT()
       console.log(transaction)
